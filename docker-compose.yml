@@ -1,0 +1,41 @@
+services:
+  backend:
+    build: ./backend
+    container_name: storage_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: storage_frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:16
+    container_name: storage_db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin293847
+      - POSTGRES_DB=storage_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  postgres_data:
