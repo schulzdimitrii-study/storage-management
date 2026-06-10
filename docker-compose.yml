@@ -23,9 +23,9 @@ services:
     image: postgres:16
     container_name: storage_db
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin293847
-      - POSTGRES_DB=storage_management
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
