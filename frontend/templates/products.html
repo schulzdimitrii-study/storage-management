@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciamento de Produtos - StorageManagement{% endblock %}
+
+{% block content %}
+<div class="page-header flex-header">
+    <div>
+        <h1 class="page-title">Inventário de Produtos</h1>
+        <p class="page-subtitle">Adicione, edite, exclua e atualize os níveis de estoque de seus itens</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('createProductModal')">
+        <i class="fa-solid fa-plus"></i> Adicionar Produto
+    </button>
+</div>
+
+<!-- Products Table Card -->
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>SKU</th>
+                    <th>Preço</th>
+                    <th>Nível de Estoque</th>
+                    <th>Fornecedor</th>
+                    <th>Categorias</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if products %}
+                {% for p in products %}
+                <tr class="{% if p.quantity <= p.min_quantity %}row-warning{% endif %}">
+                    <td>
+                        <div class="product-cell">
+                            <span class="p-name">{{ p.name }}</span>
+                            <span class="p-desc">{{ p.description or 'Sem descrição' }}</span>
+                        </div>
+                    </td>
+                    <td><code class="sku-code">{{ p.sku }}</code></td>
+                    <td><strong>${{ "%.2f"|format(p.price) }}</strong></td>
+                    <td>
+                        <div class="stock-status-cell">
+                            <span
+                                class="stock-badge {% if p.quantity <= p.min_quantity %}low{% else %}sufficient{% endif %}">
+                                {{ p.quantity }}
+                            </span>
+                            <span class="min-stock">Mín: {{ p.min_quantity }}</span>
+                        </div>
+                    </td>
+                    <td>{{ p.supplier_name }}</td>
+                    <td>
+                        <div class="category-tags">
+                            {% for cname in p.category_names %}
+                            <span class="tag-badge">{{ cname }}</span>
+                            {% else %}
+                            <span class="muted-text">-</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-action-stock" title="Registrar movimentação de estoque"
+                                onclick="openMovementModal('{{ p.id }}', '{{ p.name|escape }}')">
+                                <i class="fa-solid fa-right-left"></i>
+                            </button>
+                            <button class="btn-icon btn-action-edit edit-product-btn" data-id="{{ p.id }}"
+                                data-name="{{ p.name }}" data-description="{{ p.description or '' }}"
+                                data-sku="{{ p.sku }}" data-price="{{ p.price }}" data-quantity="{{ p.quantity }}"
+                                data-min-quantity="{{ p.min_quantity }}" data-supplier-id="{{ p.supplier_id or '' }}"
+                                data-category-ids="{{ p.category_ids|join(',') }}" title="Editar produto">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <form action="{{ url_for('products.delete', product_id=p.id) }}" method="POST"
+                                onsubmit="return confirm('Tem certeza de que deseja excluir este produto?');"
+                                style="display:inline;">
+                                <button type="submit" class="btn-icon btn-action-delete" title="Excluir produto">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="empty-table-state">
+                            <i class="fa-solid fa-box-open empty-table-icon"></i>
+                            <p>Nenhum produto registrado ainda. Clique em "Adicionar Produto" para criar um.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- CREATE PRODUCT MODAL -->
+<div id="createProductModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Novo Produto</h3>
+            <button class="modal-close-btn" onclick="closeModal('createProductModal')">&times;</button>
+        </div>
+        <form action="{{ url_for('products.create') }}" method="POST">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group col-full">
+                        <label for="create_name" class="form-label">Nome do Produto *</label>
+                        <input type="text" id="create_name" name="name" required class="form-control"
+                            placeholder="Ex: Processador Intel Core i7">
+                    </div>
+                    <div class="form-group col-full">
+                        <label for="create_description" class="form-label">Descrição</label>
+                        <textarea id="create_description" name="description" class="form-control" rows="2"
+                            placeholder="Detalhes do produto..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="create_sku" class="form-label">SKU *</label>
+                        <input type="text" id="create_sku" name="sku" required class="form-control"
+                            placeholder="Ex: CPU-INT7-092">
+                    </div>
+                    <div class="form-group">
+                        <label for="create_price" class="form-label">Preço ($) *</label>
+                        <input type="number" id="create_price" name="price" step="0.01" min="0" required
+                            class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="create_quantity" class="form-label">Quantidade Inicial</label>
+                        <input type="number" id="create_quantity" name="quantity" min="0" value="0"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="create_min_quantity" class="form-label">Estoque Mínimo de Alerta</label>
+                        <input type="number" id="create_min_quantity" name="min_quantity" min="0" value="0"
+                            class="form-control">
+                    </div>
+                    <div class="form-group col-full">
+                        <label for="create_supplier_id" class="form-label">Fornecedor</label>
+                        <select id="create_supplier_id" name="supplier_id" class="form-control">
+                            <option value="">-- Selecione o Fornecedor --</option>
+                            {% for s in suppliers %}
+                            <option value="{{ s.id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-full">
+                        <label class="form-label">Categorias (Selecione várias)</label>
+                        <div class="category-checkbox-list">
+                            {% for c in categories %}
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="category_ids" value="{{ c.id }}"> {{ c.name }}
+                            </label>
+                            {% else %}
+                            <span class="muted-text">Nenhuma categoria criada ainda.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('createProductModal')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar Produto</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div id="editProductModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Editar Produto: <span id="edit_title_name" class="highlight"></span></h3>
+            <button class="modal-close-btn" onclick="closeModal('editProductModal')">&times;</button>
+        </div>
+        <form id="editProductForm" action="" method="POST">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group col-full">
+                        <label for="edit_name" class="form-label">Nome do Produto *</label>
+                        <input type="text" id="edit_name" name="name" required class="form-control">
+                    </div>
+                    <div class="form-group col-full">
+                        <label for="edit_description" class="form-label">Descrição</label>
+                        <textarea id="edit_description" name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_sku" class="form-label">SKU *</label>
+                        <input type="text" id="edit_sku" name="sku" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_price" class="form-label">Preço ($) *</label>
+                        <input type="number" id="edit_price" name="price" step="0.01" min="0" required
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_quantity" class="form-label">Quantidade em Estoque</label>
+                        <input type="number" id="edit_quantity" name="quantity" min="0" class="form-control" readonly>
+                        <span class="input-tip">Ajuste a quantidade em estoque via movimentações.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_min_quantity" class="form-label">Estoque Mínimo de Alerta</label>
+                        <input type="number" id="edit_min_quantity" name="min_quantity" min="0" class="form-control">
+                    </div>
+                    <div class="form-group col-full">
+                        <label for="edit_supplier_id" class="form-label">Fornecedor</label>
+                        <select id="edit_supplier_id" name="supplier_id" class="form-control">
+                            <option value="">-- Selecione o Fornecedor --</option>
+                            {% for s in suppliers %}
+                            <option value="{{ s.id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-full">
+                        <label class="form-label">Categorias (Selecione várias)</label>
+                        <div class="category-checkbox-list">
+                            {% for c in categories %}
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="category_ids" value="{{ c.id }}" id="edit_cat_{{ c.id }}">
+                                {{ c.name }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('editProductModal')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Atualizar Produto</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- STOCK MOVEMENT MODAL -->
+<div id="movementModal" class="modal-overlay">
+    <div class="modal-box small-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Ajuste de Estoque: <span id="mov_product_name" class="highlight"></span></h3>
+            <button class="modal-close-btn" onclick="closeModal('movementModal')">&times;</button>
+        </div>
+        <form action="{{ url_for('products.movement') }}" method="POST">
+            <div class="modal-body">
+                <input type="hidden" id="mov_product_id" name="product_id">
+                <div class="form-group">
+                    <label for="mov_type" class="form-label">Tipo de Movimentação *</label>
+                    <select id="mov_type" name="movement_type" required class="form-control">
+                        <option value="IN">ENTRADA (Adicionar ao Estoque)</option>
+                        <option value="OUT">SAÍDA (Remover do Estoque)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mov_quantity" class="form-label">Quantidade *</label>
+                    <input type="number" id="mov_quantity" name="quantity" min="1" required class="form-control"
+                        placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label for="mov_reason" class="form-label">Motivo</label>
+                    <textarea id="mov_reason" name="reason" class="form-control" rows="2"
+                        placeholder="Ex: Reabastecimento mensal, produtos danificados..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('movementModal')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Registrar Movimentação</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
