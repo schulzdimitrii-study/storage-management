@@ -14,6 +14,10 @@
 
 Este é um sistema de controle de estoque conteinerizado multi-serviço desenvolvido com **FastAPI** (backend), **Flask** (frontend) e **PostgreSQL** (banco de dados). Os serviços são orquestrados utilizando **Docker Compose**.
 
+<p align="center">
+  <img src="docs/architecture.svg" alt="Arquitetura do Sistema" width="700" />
+</p>
+
 ---
 
 ## 🚀 Como Executar o Projeto (Docker)
