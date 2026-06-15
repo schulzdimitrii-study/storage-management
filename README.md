@@ -1,70 +1,82 @@
-# 📦 Storage Management — Inventory Control System
+# 📦 Storage Management — Sistema de Controle de Estoque
 
-This is a multi-service containerized inventory control system built with **FastAPI** (backend), **Flask** (frontend), and **PostgreSQL** (database). The services are orchestrated using **Docker Compose**.
+<p align="center">
+	<img src="https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+	<img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+	<img src="https://img.shields.io/badge/Uvicorn-Server-2B2B2B?style=for-the-badge&logo=uvicorn&logoColor=white" />
+	<img src="https://img.shields.io/badge/Pydantic-Validation-E92063?style=for-the-badge&logo=pydantic&logoColor=white" />
+	<img src="https://img.shields.io/badge/PostgreSQL-asyncpg-336791?style=for-the-badge&logo=postgresql&logoColor=white" />
+	<img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+	<img src="https://img.shields.io/badge/Pytest-9.0-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white" />
+	<img src="https://img.shields.io/badge/Flask-Frontend-000000?style=for-the-badge&logo=flask&logoColor=white" />
+</p>
+
+
+Este é um sistema de controle de estoque conteinerizado multi-serviço desenvolvido com **FastAPI** (backend), **Flask** (frontend) e **PostgreSQL** (banco de dados). Os serviços são orquestrados utilizando **Docker Compose**.
 
 ---
 
-## 🚀 How to Run the Project (Docker)
+## 🚀 Como Executar o Projeto (Docker)
 
-### 1. Prerequisites
-Ensure you have the following installed on your machine:
+### 1. Pré-requisitos
+Certifique-se de ter instalado em sua máquina:
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-### 2. Configure Environment Variables
-Copy the example environment file to create your own configuration:
+### 2. Configurar Variáveis de Ambiente
+Copie o arquivo de exemplo de variáveis de ambiente para criar sua própria configuração:
 ```bash
 cp .env.example .env
 ```
-Open the `.env` file and make sure the database settings match your needs (the defaults are preconfigured to work out of the box with Docker).
+Abra o arquivo `.env` e certifique-se de que as configurações do banco de dados atendem às suas necessidades (os valores padrão estão pré-configurados para funcionar imediatamente com o Docker).
 
-### 3. Start the Containers
-Build and spin up all services in the background:
+### 3. Iniciar os Contêineres
+Construa e inicie todos os serviços em segundo plano:
 ```bash
 docker-compose up -d --build
 ```
-This will start three containers:
-* **`storage_db`**: PostgreSQL 16 database.
-* **`storage_backend`**: FastAPI REST API listening on port `8000`.
-* **`storage_frontend`**: Flask web interface listening on port `3000`.
+Isso iniciará três contêineres:
+* **`storage_db`**: Banco de dados PostgreSQL 16.
+* **`storage_backend`**: API REST FastAPI escutando na porta `8000`.
+* **`storage_frontend`**: Interface web Flask escutando na porta `3000`.
 
-### 4. Verify Services Status
-To make sure everything is up and running correctly:
+### 4. Verificar o Status dos Serviços
+Para garantir que tudo está rodando corretamente:
 ```bash
 docker-compose ps
 ```
 
 ---
 
-## 🖥 Accessing the Application
+## 🖥 Acessando a Aplicação
 
-Once the containers are running, you can access the following interfaces:
+Assim que os contêineres estiverem rodando, você poderá acessar as seguintes interfaces:
 
-* **Frontend Dashboard:** [http://localhost:3000](http://localhost:3000)
-  * View stock levels, low-stock warnings, and latest movements.
-  * Manage inventory details and perform stock entries/removals.
-* **Backend API Docs (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
-  * Explore and test the API endpoints interactively.
-* **Backend API Docs (ReDoc):** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+* **Dashboard do Frontend:** [http://localhost:3000](http://localhost:3000)
+  * Visualize níveis de estoque, alertas de estoque baixo e últimas movimentações.
+  * Gerencie detalhes de estoque e realize entradas/saídas de produtos.
+* **Documentação da API Backend (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+  * Explore e teste os endpoints da API de forma interativa.
+* **Documentação da API Backend (ReDoc):** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ---
 
-## 🧪 Running Tests (Inside Docker)
+## 🧪 Executando Testes (No Docker)
 
-You can run the backend unit and integration test suite inside the running backend container:
+Você pode executar a suíte de testes unitários e de integração do backend dentro do contêiner do backend que está rodando:
 ```bash
 docker-compose exec backend pytest -v
 ```
 
 ---
 
-## 🛑 Stopping the Application
+## 🛑 Parando a Aplicação
 
-To shut down all containers and networks:
+Para desligar todos os contêineres e redes:
 ```bash
 docker-compose down
 ```
-To stop the services and also remove the database persistent volume (warning: this will clear all data):
+Para parar os serviços e também remover o volume persistente do banco de dados (atenção: isso apagará todos os dados):
 ```bash
 docker-compose down -v
 ```
