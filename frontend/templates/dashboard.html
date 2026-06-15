@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - StorageManagement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Visão Geral do Painel</h1>
+    <p class="page-subtitle">Estatísticas em tempo real e alertas de estoque</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-wrapper purple">
+            <i class="fa-solid fa-box"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_products }}</span>
+            <span class="stat-label">Total de Produtos</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon-wrapper emerald">
+            <i class="fa-solid fa-tags"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_categories }}</span>
+            <span class="stat-label">Categorias</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon-wrapper blue">
+            <i class="fa-solid fa-truck-field"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_suppliers }}</span>
+            <span class="stat-label">Fornecedores</span>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Widgets -->
+<div class="dashboard-widgets">
+    <!-- Stock Alerts -->
+    <div class="widget-card alert-widget">
+        <div class="widget-header">
+            <h2 class="widget-title">
+                <i class="fa-solid fa-triangle-exclamation text-warning"></i> Alertas de Estoque Baixo
+            </h2>
+            <span class="badge warning">{{ low_stock_products|length }} Itens</span>
+        </div>
+        <div class="widget-body">
+            {% if low_stock_products %}
+            <div class="alert-list">
+                {% for p in low_stock_products %}
+                <div class="alert-item">
+                    <div class="alert-product-info">
+                        <span class="product-name">{{ p.name }}</span>
+                        <span class="product-sku">{{ p.sku }}</span>
+                    </div>
+                    <div class="alert-qty-info">
+                        <span class="qty-status error">{{ p.quantity }} / {{ p.min_quantity }}</span>
+                        <span class="qty-label">Nível de Estoque</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-circle-check text-success empty-icon"></i>
+                <p class="empty-text">Todos os itens estão com estoque suficiente!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Movements -->
+    <div class="widget-card movements-widget">
+        <div class="widget-header">
+            <h2 class="widget-title">
+                <i class="fa-solid fa-right-left"></i> Atividade Recente
+            </h2>
+        </div>
+        <div class="widget-body">
+            {% if recent_movements %}
+            <div class="movement-list">
+                {% for m in recent_movements %}
+                <div class="movement-item">
+                    <div class="movement-left">
+                        <span class="movement-indicator {{ m.movement_type|lower }}">
+                            {% if m.movement_type == 'IN' %}
+                            <i class="fa-solid fa-arrow-down-long"></i> ENTRADA
+                            {% else %}
+                            <i class="fa-solid fa-arrow-up-long"></i> SAÍDA
+                            {% endif %}
+                        </span>
+                        <div class="movement-details">
+                            <span class="movement-product">{{ m.product_name }}</span>
+                            <span class="movement-reason">{{ m.reason or 'Nenhum motivo fornecido' }}</span>
+                        </div>
+                    </div>
+                    <div class="movement-right">
+                        <span
+                            class="movement-qty {% if m.movement_type == 'IN' %}text-success{% else %}text-error{% endif %}">
+                            {% if m.movement_type == 'IN' %}+{% else %}-{% endif %}{{ m.quantity }}
+                        </span>
+                        <span class="movement-date">{{ m.created_at[:10] }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-clock-rotate-left empty-icon"></i>
+                <p class="empty-text">Nenhuma movimentação registrada ainda.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

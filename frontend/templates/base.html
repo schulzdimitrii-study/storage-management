@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Storage Management{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        })();
+    </script>
+    <div class="app-container">
+        <!-- Sidebar or Header Navbar -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-boxes-stacked logo-icon"></i>
+                <span class="logo-text">Storage<span class="highlight">Management</span></span>
+            </div>
+            <div class="header-right">
+                <nav class="nav-links">
+                    <a href="{{ url_for('dashboard.index') }}"
+                        class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('products.index') }}"
+                        class="nav-item {% if active_page == 'products' %}active{% endif %}">
+                        <i class="fa-solid fa-box"></i> Produtos
+                    </a>
+                    <a href="{{ url_for('management.index') }}"
+                        class="nav-item {% if active_page == 'management' %}active{% endif %}">
+                        <i class="fa-solid fa-sliders"></i> Gerenciamento
+                    </a>
+                </nav>
+                <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <div class="toast-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="toast {{ category }}">
+                <div class="toast-content">
+                    <i
+                        class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+                    <span class="toast-message">{{ message }}</span>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 StorageManagement. Sistema Premium de Controle de Estoque.</p>
+        </footer>
+    </div>
+
+    <!-- Global Javascript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

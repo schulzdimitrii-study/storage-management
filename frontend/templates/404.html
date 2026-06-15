@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Página Não Encontrada - StorageManagement{% endblock %}
+
+{% block content %}
+<div class="error-page-container">
+    <div class="error-card">
+        <div class="error-icon-wrapper red">
+            <i class="fa-solid fa-compass-drafting"></i>
+        </div>
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Página Não Encontrada</h2>
+        <p class="error-message">A página que você está procurando não existe ou foi movida.</p>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-4">
+            <i class="fa-solid fa-house"></i> Ir para o Painel
+        </a>
+    </div>
+</div>
+{% endblock %}

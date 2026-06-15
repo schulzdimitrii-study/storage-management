@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from routes.suppliers import suppliers_router
-from routes.categories import categories_router
+from routes.category import categories_router
 from routes.products import products_router
 from routes.stock_movements import stock_movements_router
 from middlewares.logging import logging_middleware
